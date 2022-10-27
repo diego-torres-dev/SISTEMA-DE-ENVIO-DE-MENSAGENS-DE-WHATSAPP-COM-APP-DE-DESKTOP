@@ -1,9 +1,86 @@
 # Importa todos os objetos do tkinter
 from tkinter import *
 
+# Importa o módulo os
+import os
 
-def btn_clicked():
-    print("Button Clicked")
+# Importa a bibliotaca time
+import time
+
+# Import o módulo python-dotenv
+from dotenv import load_dotenv
+
+# Importações do Selenium
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+
+# Importa o urllib para codificar textos enviados na URL
+import urllib
+
+# Carrega as variáveis de ambiente do arquivo .env
+load_dotenv()
+
+# Obtém o caminho do diretório que armazena o perfil do Google Chrome
+caminho_perfil_google_chrome = os.getenv("DIR_PERFIL_GOOGLE_CHROME")
+
+# Instala o Chrome Driver e fornece o caminho do executável
+servico = Service(ChromeDriverManager().install())
+
+# Opções do Google Chrome
+options = webdriver.ChromeOptions()
+
+# Especifica o diretório do perfil
+# Caso não exista, cria um novo perfil do Google Chrome
+options.add_argument(f"user-data-dir={caminho_perfil_google_chrome}")
+
+# Adiciona um sinalizador para realizar a automação com navegador oculto
+# options.add_argument('--headless')
+
+
+def enviar_mensagem():
+    # Obtém o número de telefone digitado no campo entry0
+    telefone = entry0.get()
+
+    # Obtém a mensagem digitada no campo entry1
+    mensagem = entry1.get("1.0", END)
+
+    # Codifica o texto para enviar na URL
+    mensagem = urllib.parse.quote(mensagem)
+
+    # Cria um navegador Google Chrome
+    navegador = webdriver.Chrome(service=servico, options=options)
+
+    # Abre a URL especificada (WhatsApp Web)
+    # navegador.get("https://web.whatsapp.com/")
+
+    # Link da conversa para a qual desejamos enviar a mensagem
+    navegador.get(f"https://web.whatsapp.com/send?phone={telefone}&text={mensagem}")
+
+    # Localiza o campo da mensagem pelo XPATH
+    campo_mensagem = navegador.find_elements(
+        By.XPATH,
+        '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div/p'
+    )
+
+    while len(campo_mensagem) < 1:
+        # Aguarda 0.5s
+        time.sleep(0.5)
+
+        # Localiza o campo da mensagem pelo XPATH
+        campo_mensagem = navegador.find_elements(
+            By.XPATH,
+            '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div/p'
+        )
+
+    # Aguarda 1s
+    time.sleep(1)
+
+
+    # Envia a mensagem
+    campo_mensagem[0].send_keys(Keys.ENTER)
 
 
 # Cria uma janela do tkinter
@@ -68,7 +145,7 @@ b0 = Button(
     image=img0,
     borderwidth=0,
     highlightthickness=0,
-    command=btn_clicked,
+    command=enviar_mensagem,
     relief="flat")
 
 b0.place(

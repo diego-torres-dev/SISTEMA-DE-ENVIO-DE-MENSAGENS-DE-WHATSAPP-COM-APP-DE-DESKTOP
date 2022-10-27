@@ -1,2 +1,5 @@
 # Ambiente virtual do Python
 venv/
+
+# Arquivo dotenv
+.env
